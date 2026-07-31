@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--
+  Catálogo de Productos - Programación Web
+  Universidad Rafael Landívar (URL)
+  Propósito: Galería interactiva responsiva que consume datos dinámicos de FakeStore API
+  y convierte montos USD a Quetzales (GTQ) con soporte de modo oscuro.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Productos</title>
+<style>
+/* Reset base */
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f4f5f7;
+  color: #1f2430;
+  padding: 22px;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Componente Tarjeta */
+.card {
+  background: #ffffff;
+  border: 1px solid #e3e6ea;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(31, 36, 48, 0.12);
+}
+.thumb {
+  height: 140px;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  padding: 6px;
+}
+
+/* Navegación y Encabezados */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #e3e6ea;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.nav-links {
+  display: flex;
+  gap: 22px;
+}
+.logo {
+  font-weight: 700;
+  font-size: 19px;
+  color: #4f46e5;
+}
+.nav a {
+  color: #5b6675;
+}
+
+/* Disposición Grid de Galería */
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+}
+.galeria .card {
+  margin-bottom: 0;
+}
+
+/* Tipografía y Detalle de Calificación */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.btn-cargar {
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-cargar:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+.btn-cargar:active {
+  transform: translateY(0);
+}
+body.oscuro .btn-cargar {
+  background: #6366f1;
+}
+body.oscuro .btn-cargar:hover {
+  background: #4f46e5;
+}
+h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.intro {
+  color: #6b7280;
+  font-size: 16px;
+  margin: 0 0 22px;
+}
+.card h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.card p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+.rating-box {
+  font-size: 13px;
+  color: #d97706;
+  font-weight: 600;
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rating-count {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 12px;
+}
+.tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4f46e5;
+  background: #eef0ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* Pie de Tarjeta e Interacciones */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.btn-like {
+  background: transparent;
+  border: 1px solid #e3e6ea;
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+.btn-like:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+.btn-like.liked {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+  font-weight: bold;
+}
+.site-foot {
+  color: #8a94a3;
+  font-size: 13px;
+  margin-top: 20px;
+}
+
+/* Estilos de Modo Oscuro */
+body.oscuro {
+  background: #0f172a;
+  color: #f8fafc;
+}
+body.oscuro .nav,
+body.oscuro .card {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.oscuro .nav a,
+body.oscuro .card p,
+body.oscuro .intro,
+body.oscuro .rating-count {
+  color: #94a3b8;
+}
+body.oscuro .btn-like {
+  border-color: #334155;
+  color: #94a3b8;
+}
+body.oscuro .btn-like.liked {
+  background: #451a1a;
+  border-color: #ef4444;
+  color: #f87171;
+}
+</style>
+</head>
+<body>
+
+  <header class="site-head">
+    <nav class="nav">
+      <span class="logo">&#9672; Catálogo</span>
+      <ul class="nav-links">
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#">Productos</a></li>
+        <li><a href="#">Contacto</a></li>
+      </ul>
+      <button id="tema">&#127769; Tema</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="header-actions">
+      <div>
+        <h1>Nuestros productos</h1>
+        <p class="intro">Presiona el botón para solicitar los productos desde la API.</p>
+      </div>
+      <button id="btn-cargar" class="btn-cargar">📦 Cargar Productos</button>
+    </div>
+
+    <ul id="galeria" class="galeria">
+      <li style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #6b7280; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px;">
+        👇 Haz clic en el botón <strong>"Cargar Productos"</strong> para realizar la petición.
+      </li>
+    </ul>
+  </main>
+
+  <footer class="site-foot">&copy; 2026 · Catálogo · Programación Web · URL</footer>
+
+  <script>
+    // Alterna el modo oscuro global en el elemento body
+    const botonTema = document.querySelector('#tema');
+    botonTema.addEventListener('click', () => {
+      document.body.classList.toggle('oscuro');
+    });
+
+    /**
+     * Petición HTTP GET para obtener el catálogo de productos desde la API.
+     */
+    async function getProductosGET() {
+      const res = await fetch('https://fakestoreapi.com/products', { method: 'GET' });
+      if (!res.ok) {
+        throw new Error(`Petición GET fallida con estado ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    /**
+     * Obtiene el tipo de cambio oficial USD a GTQ. Retorna tasa de respaldo (7.80) si falla la red.
+     */
+    async function getTipoCambioGTQ() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD', { method: 'GET' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.rates?.GTQ) return data.rates.GTQ;
+        }
+      } catch (err) {
+        console.warn('Tasa de referencia Banguat utilizada como respaldo (7.80):', err);
+      }
+      return 7.80;
+    }
+
+    /**
+     * Carga y renderiza los productos en la galería con precios en Quetzales.
+     */
+    async function cargarProductos() {
+      const cont = document.querySelector('#galeria');
+      cont.innerHTML = `<li style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">⏳ Cargando productos...</li>`;
+
+      try {
+        // Obtiene datos de productos y tipo de cambio en paralelo
+        const [productos, tasaCambioGTQ] = await Promise.all([
+          getProductosGET(),
+          getTipoCambioGTQ()
+        ]);
+
+        // Construye el fragmento HTML completo en memoria para minimizar reflows del DOM
+        const html = productos.map((p) => {
+          const calificacion = p.rating ? p.rating.rate : 'N/A';
+          const totalVotos = p.rating ? p.rating.count : 0;
+          const precioQuetzales = (p.price * tasaCambioGTQ).toLocaleString('es-GT', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+
+          return `
+            <li class="card">
+              <img class="thumb" src="${p.image}" alt="${p.title}">
+              <h2>${p.title}</h2>
+              <div class="rating-box">
+                <span>⭐ ${calificacion}</span>
+                <span class="rating-count">(${totalVotos} opiniones)</span>
+              </div>
+              <p>${p.description.slice(0, 80)}...</p>
+              <div class="card-footer">
+                <span class="tag">Q${precioQuetzales}</span>
+                <button class="btn-like" aria-label="Me gusta">
+                  <span class="corazon">&#9825;</span> <span class="count">0</span>
+                </button>
+              </div>
+            </li>
+          `;
+        }).join('');
+
+        cont.innerHTML = html;
+        activarBotonesLike();
+
+      } catch (error) {
+        console.error('Error al cargar la galería:', error);
+        cont.innerHTML = `
+          <li style="grid-column: 1 / -1; text-align: center; color: #ef4444; padding: 40px; background: #fee2e2; border-radius: 12px;">
+            ⚠️ <strong>Ocurrió un error al cargar la información:</strong><br>
+            ${error.message}. Por favor intenta recargar la página.
+          </li>
+        `;
+      }
+    }
+
+    /**
+     * Registra los controladores de eventos de "Me gusta" para cada tarjeta renderizada.
+     */
+    function activarBotonesLike() {
+      const botonesLike = document.querySelectorAll('.btn-like');
+
+      botonesLike.forEach((boton) => {
+        let meGusta = false;
+
+        boton.addEventListener('click', () => {
+          meGusta = !meGusta;
+
+          const corazon = boton.querySelector('.corazon');
+          const contador = boton.querySelector('.count');
+
+          if (meGusta) {
+            corazon.innerHTML = '&#9829;';
+            contador.textContent = '1';
+            boton.classList.add('liked');
+          } else {
+            corazon.innerHTML = '&#9825;';
+            contador.textContent = '0';
+            boton.classList.remove('liked');
+          }
+        });
+      });
+    }
+
+    // Asigna el evento click al botón trigger para cargar los productos dinámicamente
+    const btnCargar = document.querySelector('#btn-cargar');
+    btnCargar.addEventListener('click', cargarProductos);
+  </script>
+</body>
+</html>
